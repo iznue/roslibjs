@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script src="../build/roslib.js"></script>
+<script>
+  	// Connecting to ROS
+  	// -----------------
+
+	
+  	var controller_ros = new ROSLIB.Ros();
+
+        // If there is an error on the backend, an 'error' emit will be emitted.
+        controller_ros.on('error', function(error) {
+        document.getElementById('status').innerHTML = 'Error';
+        //document.getElementById('error').style.display = 'inline';
+        console.log(error);
+        });
+
+        // Find out exactly when we made a connection.
+        controller_ros.on('connection', function() {
+        console.log('Connection made!');
+        document.getElementById('status').innerHTML = 'Connected';
+        //document.getElementById('connected').style.display = 'inline';
+        });
+
+        controller_ros.on('close', function() {
+        console.log('Connection closed.');
+        document.getElementById('status').innerHTML = 'Closed';
+        //document.getElementById('closed').style.display = 'inline';
+        });
+
+        // Create a connection to the rosbridge WebSocket server.
+      ////controller_ros.connect('ws://192.168.50.112:9090');
+      controller_ros.connect('ws://localhost:9090');     // <<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== 
+      // controller_ros.connect('ws://localhost:9090');
+
+
+
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+                // Connecting to ROS
+        // -----------------
+        var robot_ros = new ROSLIB.Ros();
+
+        // If there is an error on the backend, an 'error' emit will be emitted.
+        robot_ros.on('error', function(error) {
+        document.getElementById('robot_status').innerHTML = 'Error';
+        //document.getElementById('error').style.display = 'inline';
+        console.log(error);
+        });
+
+        // Find out exactly when we made a connection.
+        robot_ros.on('connection', function() {
+        console.log('Connection made!');
+        document.getElementById('robot_status').innerHTML = 'Connected';
+        //document.getElementById('connected').style.display = 'inline';
+        });
+
+        robot_ros.on('close', function() {
+        console.log('Connection closed.');
+        document.getElementById('robot_status').innerHTML = 'Closed';
+        //document.getElementById('closed').style.display = 'inline';
+        });
+
+        //ysj_ros
+        // robot_ros.connect('ws://192.168.50.154:9090');
+         robot_ros.connect('ws://223.171.62.1:9090'); //<<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== <<=== 
+        ///robot_ros.connect('ws://192.168.0.17:9090');
+        //robot_ros.connect('ws://10.60.2.201:9090');
+        //robot_ros.connect('ws://10.60.3.86:9090');
+
+
+        // var videoimg, img_header, img_format;
+
+        var videoListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        // name : 'main_camera/image_raw/compressed',
+        //name : 'usb_cam/image_raw/compressed',
+        name : 'kudos_cam_A_ex/image_raw/compressed',
+        messageType : 'sensor_msgs/CompressedImage'
+        });
+        var videoPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : 'main_camera/image_raw/compressed',
+        // name : 'imageFromRobot/CompressedImage',
+        messageType : 'sensor_msgs/CompressedImage'
+        });
+
+        videoListener.subscribe(function(message) {
+
+                document.getElementById('vImage').src = "data:image/jpg;base64," + message.data;
+                                // img_header = message.header;
+                                // img_format = message.format;
+                                // videoimg = message.data;
+                                videoPublisher.publish(message);
+
+        });
+
+/*	
+        var mapListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : 'Mapping_state',
+        messageType : 'std_msgs/UInt16'
+        });
+        var mapPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : 'Mapping_state',
+        messageType : 'std_msgs/UInt16'
+        });
+	
+	mapListener.subscribe(function(message) {
+                mapPublisher.publish(message);
+        });
+*/
+
+	var GPSListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : 'GPS_state',
+        messageType : 'std_msgs/UInt16'
+        });
+        var GPSPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : 'GPS_state',
+        messageType : 'std_msgs/UInt16'
+        });
+	
+	GPSListener.subscribe(function(message) {
+                GPSPublisher.publish(message);
+        });
+
+
+	var FastListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : 'Fast_state',
+        messageType : 'std_msgs/UInt16'
+        });
+        var FastPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : 'Fast_state',
+        messageType : 'std_msgs/UInt16'
+        });
+	
+	FastListener.subscribe(function(message) {
+                FastPublisher.publish(message);
+        });
+
+
+	var SlowListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : 'Slow_state',
+        messageType : 'std_msgs/UInt16'
+        });
+        var SlowPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : 'Slow_state',
+        messageType : 'std_msgs/UInt16'
+        });
+	
+	SlowListener.subscribe(function(message) {
+                SlowPublisher.publish(message);
+        });
+
+
+
+        var MissionListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/mission',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var MissionPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/mission',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        MissionListener.subscribe(function(message) {
+                MissionPublisher.publish(message);
+        });
+
+
+
+
+        var rtspListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/rtsp_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var rtspPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/rtsp_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        rtspListener.subscribe(function(message) {
+                rtspPublisher.publish(message);
+        });
+
+
+
+        var mapListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/gmapping_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var mapPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/gmapping_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        mapListener.subscribe(function(message) {
+                mapPublisher.publish(message);
+        });
+
+
+
+        var map_saveListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/map_save_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var map_savePublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/map_save_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        map_saveListener.subscribe(function(message) {
+                map_savePublisher.publish(message);
+        });
+
+
+
+        var odomListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/odom_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var odomPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/odom_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        odomListener.subscribe(function(message) {
+                odomPublisher.publish(message);
+        });
+
+
+
+        var lidarListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/lidar_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var lidarPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/lidar_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        lidarListener.subscribe(function(message) {
+                lidarPublisher.publish(message);
+        });
+
+/*
+        var naviListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/navigation_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var naviPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/naviagion_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        naviListener.subscribe(function(message) {
+                naviPublisher.publish(message);
+        });
+
+
+        var rviziListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/rviz_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var rvizPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/rviz_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        rvizListener.subscribe(function(message) {
+                rvizPublisher.publish(message);
+        });
+*/
+
+
+        var ParkingListener = new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/parking_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var ParkingPublisher =new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/parking_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        var ObstacleListener = new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/obstacle_state',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var ObstaclePublisher =new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/obstacle_state',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+
+
+        ParkingListener.subscribe(function(message) {
+                ParkingPublisher.publish(message);
+        });
+
+        ObstacleListener.subscribe(function(message) {
+                ObstaclePublisher.publish(message);
+        });
+
+
+
+        var IMUListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : '/imu/data',
+        messageType : 'sensor_msgs/Imu'
+        });
+
+        var IMUListener2 = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : '/imu_return/data',
+        messageType : 'sensor_msgs/Imu'
+        });
+
+        var CmdvelListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/cmd_vel',
+                messageType : 'geometry_msgs/Twist'
+        })
+        var CmdvelPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/cmd_vel',
+                messageType : 'geometry_msgs/Twist'
+        });
+        CmdvelListener.subscribe(function(message) {
+                CmdvelPublisher.publish(message);
+        });
+
+        var md_driver_statusListener = new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/md_driver_status',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var md_driver_statusPublisher =new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/md_driver_status',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        md_driver_statusListener.subscribe(function(message) {
+                md_driver_statusPublisher.publish(message);
+        });
+
+
+
+
+        var rosjoy_statusListener = new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/rosjoy_status',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var rosjoy_statusPublisher =new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/rosjoy_status',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        rosjoy_statusListener.subscribe(function(message) {
+                rosjoy_statusPublisher.publish(message);
+        });
+
+
+
+        var getmission_statusListener = new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/getmission_ready',
+                messageType : 'std_msgs/UInt16'
+        })
+
+        var getmission_statusPublisher =new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/getmission_ready',
+                messageType : 'std_msgs/UInt16'
+
+        });
+
+        getmission_statusListener.subscribe(function(message) {
+                getmission_statusPublisher.publish(message);
+        });
+
+
+
+         //Manipulator
+        var MPListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/joy',
+                messageType : 'sensor_msgs/Joy'
+        })
+
+        var MPPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/joy',
+                messageType : 'sensor_msgs/Joy'
+
+        });
+
+        MPListener.subscribe(function(message) {
+                MPPublisher.publish(message);
+        });
+
+        var MPteleop_onoffListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/teleop_onoff',
+                messageType : 'std_msgs/Int8'
+        })
+
+        var MPteleop_onoffPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/teleop_onoff',
+                messageType : 'std_msgs/Int8'
+
+        });
+
+        MPteleop_onoffListener.subscribe(function(message) {
+                MPteleop_onoffPublisher.publish(message);
+        });
+
+
+        var CAMListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        // name : 'main_camera/image_raw/compressed',
+        name : '/output/image_raw/compressed',
+        messageType : 'sensor_msgs/CompressedImage'
+        });
+
+        var CAMPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : '/realsence/image_raw/compressed',
+        // name : 'imageFromRobot/CompressedImage',
+        messageType : 'sensor_msgs/CompressedImage'
+        });
+
+        CAMListener.subscribe(function(message) {
+                CAMPublisher.publish(message);
+        });
+
+
+        var ScreenshotListener = new ROSLIB.Topic({
+        ros : robot_ros,
+        // name : 'main_camera/image_raw/compressed',
+        name : '/screenshot/image_raw',
+        messageType : 'sensor_msgs/Image'
+        });
+
+        var ScreenshotPublisher = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : '/screenshot/image_raw',
+        // name : 'imageFromRobot/CompressedImage',
+        messageType : 'sensor_msgs/Image'
+        });
+
+        ScreenshotListener.subscribe(function(message) {
+                ScreenshotPublisher.publish(message);
+        });
+
+
+        var Gui_terminal_commandListener = new ROSLIB.Topic({
+        ros : controller_ros,
+        name : '/gui_terminal_command',
+        messageType : 'std_msgs/String'
+        });
+
+        var Gui_terminal_commandPublisher = new ROSLIB.Topic({
+        ros : robot_ros,
+        name : '/gui_terminal_command',
+        messageType : 'std_msgs/String'
+        });
+
+        Gui_terminal_commandListener.subscribe(function(message) {
+                Gui_terminal_commandPublisher.publish(message);
+        });
+
+
+        var CAM_posiListener = new ROSLIB.Topic({
+                ros : controller_ros,
+                name : '/CAM_posi',
+                messageType : 'std_msgs/Int8'
+        })
+
+        var CAM_posiPublisher =new ROSLIB.Topic({
+                ros : robot_ros,
+                name : '/CAM_posi',
+                messageType : 'std_msgs/Int8'
+
+        });
+
+        CAM_posiListener.subscribe(function(message) {
+                CAM_posiPublisher.publish(message);
+        });
+
+
+
+</script>
+</head>
+
+<body>
+  <h1>HW Web inspector Example</h1>
+
+  <img id="vImage" height="480" width="640">
+
+  <div id="statusIndicator">
+    <p>base6
+      	Controller Connection status: <span id="status"></span>
+    </p>
+
+    <p>base6
+      	Robot Connection status: <span id="robot_status"></span>
+    </p>
+
+    <p>
+    	RobotPC- JoyAxes1 : <span id="robot_axes1"></span>
+    </p>
+
+    <p>
+    	RobotPC- JoyAxes2 : <span id="robot_axes2"></span>
+    </p>
+
+  </div>
+
+
+  <!--<script>
+  	window.onload = function(){ss
+  		timer = setInterval(function(){
+  			//robot_velfunction();
+  		}, 10);  // -> ms
+  	};-->
+
+<!--
+  <script language='javascript'>
+  window.setTimeout('window.location.reload()', 5000);
+  </script>
+-->
+<!--
+  <script>
+  int ros_topic_data;
+  if(ros_topic_data == 77){
+      location.reload();
+  }
+  </script>
+-->
+  </script>
+</body>
+</html>
